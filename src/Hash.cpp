@@ -111,32 +111,6 @@ V& HashMap<K, V>::operator[](const K& key){
 template<class K, class V>
 void HashMap<K, V>::put(const K& key,const V& value){
     int index = hash<K>(key) % capacity;
-    /*
-    HashEntry<K, V>* current = array[index];
-    if(current == nullptr){
-        HashEntry<K, V>* new_entry = new HashEntry<K, V>(key, value);
-        array[index] = new_entry;
-    }
-    else{
-        HashEntry<K, V>* previous = nullptr;
-        while(current != nullptr){
-            if(current->key == key){
-                current->value = value;
-                return;
-            }
-            previous = current;
-            current = current->next;
-        }
-        
-        HashEntry<K, V>* new_entry = new HashEntry<K, V>(key, value);
-        previous->next = new_entry;
-    }
-
-    size++;
-
-    if((double)size / capacity > HashMap::load_factor){
-        rehash(2*capacity);
-    }*/
 
     HashEntry<K, V>* previous = nullptr;
     HashEntry<K, V>* current = array[index];
@@ -164,7 +138,7 @@ void HashMap<K, V>::put(const K& key,const V& value){
     }
 }
 template<class K, class V>
-V HashMap<K, V>::get(const K &key) const{
+V& HashMap<K, V>::get(const K &key) const{
     int index = hash<K>(key) % capacity;
 
     HashEntry<K, V>* current = array[index];
