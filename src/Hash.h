@@ -42,7 +42,7 @@ class HashMap{
         ~HashMap();
 
         void put(const K& key, const V& value);
-        V get(const K& key) const;
+        V& get(const K& key) const;
 
         friend void swap<>(HashMap& first, HashMap& second);
 };
