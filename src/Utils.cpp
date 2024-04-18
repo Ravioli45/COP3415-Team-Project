@@ -1,3 +1,6 @@
+#ifndef UTILS_CPP
+#define UTILS_CPP
+
 #include "Utils.h"
 
 namespace utils{
@@ -8,3 +11,5 @@ namespace utils{
         b = temp;
     }
 }
+
+#endif
