@@ -176,11 +176,9 @@ void HashMap<K, V>::rehash(unsigned new_capacity){
 
 template<class K, class V>
 void swap(HashMap<K, V>& first, HashMap<K, V>& second){
-    using std::swap;
-
-    swap(first.size, second.size);
-    swap(first.capacity, second.capacity);
-    swap(first.array, second.array);
+    utils::swap(first.size, second.size);
+    utils::swap(first.capacity, second.capacity);
+    utils::swap(first.array, second.array);
 }
 
 template<class K, class V>

@@ -4,6 +4,7 @@
 #include <stdexcept>
 #include <string>
 #include <vector>
+#include "Utils.cpp"
 
 template <typename T>
 inline unsigned long hash(const T& item);
