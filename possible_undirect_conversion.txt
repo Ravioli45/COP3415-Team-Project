@@ -1,6 +1,8 @@
 void AirportGraph::add_edge_undirected(const std::string& from, const std::string& to, int cost){
+  
     adj_map[from].push_back(AirportNeighbor(to, cost));
     adj_map[to].push_back(AirportNeighbor(from, cost));
+    
 }
 //add to graph.cpp
 AirportGraph toUndirected(airport_graph){
@@ -9,8 +11,18 @@ AirportGraph toUndirected(airport_graph){
     int size = airport_graph.size();
 
     for(int i = 0; i < size; i++){
+        if(airport_graph[i].from.cost>airport_graph[i].to.cost){
+            undirectedGraph.add_edge_undirected(airport_graph[i].from,airport_graph[i].to,airport_graph[i].to.cost);
+        }else if(airport_graph[i].from.cost<airport_graph[i].to.cost){
+
+            undirectedGraph.add_edge_undirected(airport_graph[i].from,airport_graph[i].to,airport_graph[i].from.cost);
+        
+}else{
+        
 
         undirectedGraph.add_edge_undirected(airport_graph[i].from,airport_graph[i].to,airport_graph[i].cost);
+}
+        
 
 
     }
