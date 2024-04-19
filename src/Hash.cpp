@@ -155,7 +155,7 @@ V& HashMap<K, V>::get(const K &key) const{
 
 template<class K, class V>
 bool HashMap<K, V>::has_key(const K& key) const{
-    int index = hash<K>() % capacity;
+    int index = hash<K>(key) % capacity;
 
     HashEntry<K, V>* current = array[index];
 
