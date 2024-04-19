@@ -154,6 +154,22 @@ V& HashMap<K, V>::get(const K &key) const{
 }
 
 template<class K, class V>
+bool HashMap<K, V>::has_key(const K& key) const{
+    int index = hash<K>() % capacity;
+
+    HashEntry<K, V>* current = array[index];
+
+    while(current != nullptr){
+        if(current->key == key){
+            return true;
+        }
+        current = current->next;
+    }
+
+    return false;
+}
+
+template<class K, class V>
 void HashMap<K, V>::rehash(unsigned new_capacity){
     //std::cout << "rehash: ";
     HashMap<K, V> that(new_capacity);
