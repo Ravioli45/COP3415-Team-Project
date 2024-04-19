@@ -1,1 +1,9 @@
-//will return
+primMST(undirected_graph){
+
+  bool visited_array[undirected_graph.size()];
+  memset(visited_array,false,sizeof(undirected_graph));
+  undirected_graph[0]=true;
+  //start
+
+
+}
