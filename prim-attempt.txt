@@ -1,9 +1,21 @@
 primMST(undirected_graph){
-
+  Airort_Ggaph MST;
   bool visited_array[undirected_graph.size()];
   memset(visited_array,false,sizeof(undirected_graph));
-  undirected_graph[0]=true;
+  
   //start
+  for(int i=0;i<sizeof(undirected_graph)i++){
+    undirected_graph[i]=true;
+    Airport_neighbor cheap = min(undirected_graph[i].Airport_neighbors);
+    int chosenEdge = cheap.cost;
+    MST.add_edge(undirected_graph[i],cheap,chosenEdge)
+    }
 
+
+    
+    
+    
+
+}
 
 }
