@@ -29,4 +29,21 @@ AirportGraph toUndirected(airport_graph){
     return undirectedGraph;
     }
     //add to main
+
+/*
+AirportGraph toUndirected(const AirportGraph& airport_graph) {
+    AirportGraph undirectedGraph;
+
+    for (const auto& pair : airport_graph.adj_map) {
+        const std::string& from = pair.first;
+        for (const auto& neighbor : pair.second) {
+            const std::string& to = neighbor.get_neighbor();
+            int cost = neighbor.get_cost();
+            undirectedGraph.add_edge_undirected(from, to, cost);
+        }
+    }
+
+    return undirectedGraph;
+}
+*/ possible other implementation
     
