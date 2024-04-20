@@ -19,3 +19,38 @@ primMST(undirected_graph){
 }
 
 }
+
+/*
+void primMST(const AirportGraph& undirected_graph) {
+    AirportGraph MST;
+    std::vector<bool> visited(undirected_graph.adj_map.size(), false);
+
+    // Start
+    for (const auto& pair : undirected_graph.adj_map) {
+        const std::string& from = pair.first;
+        if (!visited[getIndex(undirected_graph, from)]) {
+            visited[getIndex(undirected_graph, from)] = true;
+            int minCost = INT_MAX;
+            std::string cheapestNeighbor;
+            for (const auto& neighbor : pair.second) {
+                if (neighbor.get_cost() < minCost) {
+                    minCost = neighbor.get_cost();
+                    cheapestNeighbor = neighbor.get_neighbor();
+                }
+            }
+            MST.add_edge(from, cheapestNeighbor, minCost);
+        }
+    }
+}
+
+int getIndex(const AirportGraph& graph, const std::string& airport) {
+    int index = 0;
+    for (const auto& pair : graph.adj_map) {
+        if (pair.first == airport) {
+            return index;
+        }
+        ++index;
+    }
+    return -1; // Airport not found
+}
+*/
