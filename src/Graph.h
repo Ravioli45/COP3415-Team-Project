@@ -3,9 +3,12 @@
 
 #include <string>
 #include <vector>
+#include <climits>
 #include "Hash.cpp"
+#include "Minheap.cpp"
 
 class AirportNeighbor;
+class Path;
 
 class AirportGraph{
     private:
@@ -16,6 +19,7 @@ class AirportGraph{
         std::vector<AirportNeighbor>& operator[](const std::string& airport_name);
 
         void add_edge(const std::string& from, const std::string& to, int distance, int cost);
+        Path dijkstra(const std::string& from, const std::string& to) const;
 };
 
 class AirportNeighbor{
@@ -30,6 +34,44 @@ class AirportNeighbor{
         const int& get_distance() const;
         const int& get_cost() const;
     
+    friend class AirportGraph;
+};
+
+class StopInfo{
+    private:
+        std::string name;
+        int distance;
+        int cost;
+        int num_stops;
+        StopInfo(const std::string& the_name, int the_distance, int the_cost, int num_stops);
+
+    public:
+        StopInfo();
+        bool operator>(const StopInfo& other) const;
+        bool operator<(const StopInfo& other) const;
+
+        const std::string& get_name() const;
+        const int& get_distance() const;
+        const int& get_cost() const;
+        const int& get_num_stops() const;
+
+    friend class AirportGraph;
+};
+
+class Path{
+    private:
+        std::vector<std::string> stops;
+        int distance;
+        int cost;
+        int num_stops;
+        Path();
+
+    public:
+        const std::vector<std::string>& get_stops() const;
+        const int& get_distance() const;
+        const int& get_cost() const;
+        const int& get_num_stops() const;
+
     friend class AirportGraph;
 };
 
