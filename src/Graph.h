@@ -20,9 +20,12 @@ class AirportGraph{
         std::vector<AirportNeighbor>& operator[](const std::string& airport_name);
 
         void add_edge(const std::string& from, const std::string& to, int distance, int cost);
+        void add_edge_undirected(const std::string& from, const std::string& to, int distance, int cost);
         Path dijkstra(const std::string& from, const std::string& to) const;
         Path dijkstra_n_stops(const std::string& from, const std::string& to, int required_stops) const;
         unsigned get_num_connections(const std::string& airport_name) const;
+
+        static AirportGraph make_undirected(const AirportGraph& graph);
 };
 
 class AirportNeighbor{
@@ -37,6 +40,26 @@ class AirportNeighbor{
         const int& get_distance() const;
         const int& get_cost() const;
     
+    friend class AirportGraph;
+};
+
+class Edge{
+    private:
+        std::string from;
+        std::string to;
+        int weight;
+
+        Edge(const std::string& came_from, const std::string& go_to, int the_weight);
+    public:
+        Edge();
+        bool operator==(const Edge& other) const;
+        bool operator>(const Edge& other) const;
+        bool operator<(const Edge& other) const;
+
+        const std::string& get_from() const;
+        const std::string& get_to() const;
+        const int& get_weight() const;
+
     friend class AirportGraph;
 };
 

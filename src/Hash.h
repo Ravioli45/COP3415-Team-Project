@@ -45,6 +45,7 @@ class HashMap{
         void put(const K& key, const V& value);
         V& get(const K& key) const;
         bool has_key(const K& key) const;
+        std::vector<K> keys() const;
 
         friend void swap<>(HashMap& first, HashMap& second);
 };

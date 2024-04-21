@@ -5,6 +5,11 @@ inline unsigned long hash(const StopInfo& stop_info){
     return hash<>(stop_info.get_name()) + hash<>(stop_info.get_num_stops());
 }
 
+template<>
+inline unsigned long hash(const Edge& edge){
+    return hash<>(edge.get_from()) + hash<>(edge.get_to());
+}
+
 AirportGraph::AirportGraph() : adj_map(){};
 
 std::vector<AirportNeighbor>& AirportGraph::operator[](const std::string& airport_name){
@@ -15,6 +20,10 @@ void AirportGraph::add_edge(const std::string& from, const std::string& to, int 
     adj_map[from].push_back(AirportNeighbor(to, distance, cost));
     num_connections[from]++;
     num_connections[to]++;
+}
+void AirportGraph::add_edge_undirected(const std::string& from, const std::string& to, int distance, int cost){
+    add_edge(from, to, distance, cost);
+    add_edge(to, from, distance, cost);
 }
 
 Path AirportGraph::dijkstra(const std::string& from, const std::string& to) const{
@@ -179,6 +188,46 @@ unsigned AirportGraph::get_num_connections(const std::string& airport_name) cons
     }
 }
 
+AirportGraph AirportGraph::make_undirected(const AirportGraph& graph){
+    HashMap<Edge, bool> added;
+    AirportGraph result;
+    std::vector<std::string> keys = graph.adj_map.keys();
+
+    for(std::string k : keys){
+
+        std::vector<AirportNeighbor> neighbors = graph.adj_map.get(k);
+        for(AirportNeighbor n : neighbors){
+            if(added[Edge(k, n.neighbor, 0)]){
+                continue;
+            }
+
+            //have to look for connection from other direction
+            //std::vector<AirportNeighbor> neighbor_neighbors = 
+            if(!graph.adj_map.has_key(n.neighbor))
+                goto done;
+            for(AirportNeighbor nn : graph.adj_map.get(n.neighbor)){
+                if(nn.neighbor == k){
+                    //found connection from other direction
+                    int min_cost = n.cost < nn.cost ? n.cost : nn.cost;
+                    result.add_edge_undirected(k, n.neighbor, -1, min_cost);
+                    goto done;
+                }
+            }
+            //if no connection from other direction was found
+            result.add_edge_undirected(k, n.neighbor, -1, n.cost);
+
+            done:;
+        }
+
+    }
+
+    //for(auto test : result.adj_map.get("ORD")){
+    //    std::cout << test.neighbor << ' ' << test.cost << std::endl;
+    //}
+
+    return result;
+}
+
 AirportNeighbor::AirportNeighbor(const std::string& neighbor_name, int the_distance, int the_cost){
     neighbor = neighbor_name;
     distance = the_distance;
@@ -193,6 +242,32 @@ const int& AirportNeighbor::get_distance() const{
 }
 const int& AirportNeighbor::get_cost() const{
     return cost;
+}
+
+Edge::Edge() : from(""), to(""), weight(0){};
+Edge::Edge(const std::string& came_from, const std::string& go_to, int the_weight){
+    from = came_from;
+    to = go_to;
+    weight = the_weight;
+}
+bool Edge::operator==(const Edge& other) const{
+    //bool dest_match = ((this->from == other.from) && (this->to == other.to)) || ((this->from == other.to) && (this->to == other.from));
+    return ((this->from == other.from) && (this->to == other.to)) || ((this->from == other.to) && (this->to == other.from));
+}
+bool Edge::operator>(const Edge& other) const{
+    return this->weight > other.weight;
+}
+bool Edge::operator<(const Edge& other) const{
+    return this->weight < other.weight;
+}
+const std::string& Edge::get_from() const{
+    return from;
+}
+const std::string& Edge::get_to() const{
+    return to;
+}
+const int& Edge::get_weight() const{
+    return weight;
 }
 
 StopInfo::StopInfo() : StopInfo("", "", INT_MAX, INT_MAX, INT_MAX){};

@@ -169,6 +169,22 @@ bool HashMap<K, V>::has_key(const K& key) const{
     return false;
 }
 
+// returns the keys of the hashmap in no particular order
+template<class K, class V>
+std::vector<K> HashMap<K, V>::keys() const{
+    std::vector<K> result;
+
+    for(unsigned i = 0; i < capacity; i++){
+        HashEntry<K, V>* current = array[i];
+        while(current != nullptr){
+            result.push_back(current->key);
+            current = current->next;
+        }
+    }
+
+    return result;
+}
+
 template<class K, class V>
 void HashMap<K, V>::rehash(unsigned new_capacity){
     //std::cout << "rehash: ";
