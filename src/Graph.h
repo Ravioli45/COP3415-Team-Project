@@ -13,6 +13,7 @@ class Path;
 class AirportGraph{
     private:
         HashMap<std::string, std::vector<AirportNeighbor>> adj_map;
+        HashMap<std::string, unsigned> num_connections;
 
     public:
         AirportGraph();
@@ -20,20 +21,8 @@ class AirportGraph{
 
         void add_edge(const std::string& from, const std::string& to, int distance, int cost);
         Path dijkstra(const std::string& from, const std::string& to) const;
-        Path dijkstra_n_stops(const std::string& from, const std::string& to, int required_stops);
-};
-
-class Edge{
-    private:
-        std::string from;
-        std::string to;
-        int weight;
-
-        Edge(const std::string& come_from, const std::string& go_to, int the_weight);
-
-        bool operator<(const Edge& other);
-
-    friend class AirportGraph;
+        Path dijkstra_n_stops(const std::string& from, const std::string& to, int required_stops) const;
+        unsigned get_num_connections(const std::string& airport_name) const;
 };
 
 class AirportNeighbor{

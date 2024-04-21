@@ -13,6 +13,8 @@ std::vector<AirportNeighbor>& AirportGraph::operator[](const std::string& airpor
 
 void AirportGraph::add_edge(const std::string& from, const std::string& to, int distance, int cost){
     adj_map[from].push_back(AirportNeighbor(to, distance, cost));
+    num_connections[from]++;
+    num_connections[to]++;
 }
 
 Path AirportGraph::dijkstra(const std::string& from, const std::string& to) const{
@@ -77,7 +79,7 @@ Path AirportGraph::dijkstra(const std::string& from, const std::string& to) cons
     return result;
 }
 
-Path AirportGraph::dijkstra_n_stops(const std::string& from, const std::string& to, int required_stops){
+Path AirportGraph::dijkstra_n_stops(const std::string& from, const std::string& to, int required_stops) const{
     Path result;
     HashDSU<std::string> visited_dsu;
     HashMap<StopInfo, bool> visited;
@@ -89,11 +91,11 @@ Path AirportGraph::dijkstra_n_stops(const std::string& from, const std::string& 
         return result;
     }
     
-    for(AirportNeighbor initial_neighbor : adj_map[from]){
+    for(AirportNeighbor initial_neighbor : adj_map.get(from)){
         int new_dist = initial_neighbor.distance;
         int new_cost = initial_neighbor.cost;
         int new_num_stops = 0;
-        // cost and distance aren't used in hash<StopInfo> or StopInfo::operator== :), oh boy
+        // cost, distance, and from aren't used in hash<StopInfo> or StopInfo::operator== :), oh boy
         came_from[StopInfo(initial_neighbor.neighbor, from, 0, 0, new_num_stops)] = StopInfo(from, "", new_dist, new_cost, new_num_stops);
         to_search.push(StopInfo(initial_neighbor.neighbor, from, new_dist, new_cost, new_num_stops));
     }
@@ -120,7 +122,7 @@ Path AirportGraph::dijkstra_n_stops(const std::string& from, const std::string& 
             continue;
         }
 
-        std::vector<AirportNeighbor> neighbors = adj_map[searching.name];
+        std::vector<AirportNeighbor> neighbors = adj_map.get(searching.name);
         for(AirportNeighbor n : neighbors){
             //if adding this connection would create a loop, don't even bother
             if(visited_dsu.find_set(n.get_neighbor()) == visited_dsu.find_set(searching.from)){
@@ -142,7 +144,7 @@ Path AirportGraph::dijkstra_n_stops(const std::string& from, const std::string& 
         //???
         visited_dsu.union_set(searching.name, searching.from);
     }
-    std::cout << found_path << std::endl;
+    //std::cout << found_path << std::endl;
 
     if(!found_path){
         return result;
@@ -165,6 +167,16 @@ Path AirportGraph::dijkstra_n_stops(const std::string& from, const std::string& 
     result.num_stops = came_from.get(StopInfo(to, "", 0, 0, required_stops)).num_stops;
 
     return result;
+}
+
+unsigned AirportGraph::get_num_connections(const std::string& airport_name) const{
+    //return num_connections[airport_name];
+    if(!num_connections.has_key(airport_name)){
+        return 0;
+    }
+    else{
+        return num_connections.get(airport_name);
+    }
 }
 
 AirportNeighbor::AirportNeighbor(const std::string& neighbor_name, int the_distance, int the_cost){
