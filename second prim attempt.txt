@@ -1,0 +1,15 @@
+Minheap primMST(AirportGraph undirected_graph){
+
+  Minheap primMST;
+  //make a new prim mst
+  for(int i=0;i<undirected_graph.size();i++){
+    cur = undirected_graph.pop();
+    //for each current edge
+    find(cur.to,cur.from);    
+    //find the current edge and see if they share a root, iirc the find function will ignore if they have different roots
+    primMST.union(cur.to,cur.from);
+    //union together but i think this might be wrong i think im missing a conditional statement
+  }
+  return primMST;
+//result
+}
