@@ -204,3 +204,39 @@ HashEntry<K, V>::HashEntry(const K& the_key, const V& the_value){
 
     next = nullptr;
 }
+
+template<typename T>
+void HashDSU<T>::make_set(const T& value){
+    parent[value] = value;
+    rank[value] = 0;
+}
+
+template<typename T>
+const T& HashDSU<T>::find_set(const T& value){
+    if(!parent.has_key(value)){
+        make_set(value);
+    }
+
+    if(value == parent[value])
+        return value;
+    return parent[value] = find_set(parent[value]);
+}
+
+template<typename T>
+void HashDSU<T>::union_set(const T& first, const T& second){
+    const T& rep1 = find_set(first);
+    const T& rep2 = find_set(second);
+
+    if(rep1 != rep2){
+        if(rank[rep1] < rank[rep2]){
+            parent[rep1] = rep2;
+        }
+        else if(rank[rep1] > rank[rep2]){
+            parent[rep2] = rep1;
+        }
+        else{
+            parent[rep2] = rep1;
+            rank[rep1]++;
+        }
+    }
+}

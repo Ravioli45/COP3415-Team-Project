@@ -62,6 +62,18 @@ class HashEntry{
 };
 
 
+template<typename T>
+class HashDSU{
+    private:
+        HashMap<T, T> parent;
+        HashMap<T, int> rank;
+
+    public:
+        void make_set(const T& value);
+        const T& find_set(const T& value);
+        void union_set(const T& first, const T& second);
+};
+
 template class HashMap<std::string, int>;
 template class HashMap<std::string, std::vector<std::string>>;
 template class HashMap<std::string, bool>;

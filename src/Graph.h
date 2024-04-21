@@ -20,6 +20,20 @@ class AirportGraph{
 
         void add_edge(const std::string& from, const std::string& to, int distance, int cost);
         Path dijkstra(const std::string& from, const std::string& to) const;
+        Path dijkstra_n_stops(const std::string& from, const std::string& to, int required_stops);
+};
+
+class Edge{
+    private:
+        std::string from;
+        std::string to;
+        int weight;
+
+        Edge(const std::string& come_from, const std::string& go_to, int the_weight);
+
+        bool operator<(const Edge& other);
+
+    friend class AirportGraph;
 };
 
 class AirportNeighbor{
@@ -40,17 +54,20 @@ class AirportNeighbor{
 class StopInfo{
     private:
         std::string name;
+        std::string from;
         int distance;
         int cost;
         int num_stops;
-        StopInfo(const std::string& the_name, int the_distance, int the_cost, int num_stops);
+        StopInfo(const std::string& the_name, const std::string& from,int the_distance, int the_cost, int num_stops);
 
     public:
         StopInfo();
+        bool operator==(const StopInfo& other) const;
         bool operator>(const StopInfo& other) const;
         bool operator<(const StopInfo& other) const;
 
         const std::string& get_name() const;
+        const std::string& get_from() const;
         const int& get_distance() const;
         const int& get_cost() const;
         const int& get_num_stops() const;
