@@ -28,6 +28,7 @@ class AirportGraph{
 
         static AirportGraph make_undirected(const AirportGraph& graph);
         std::vector<Edge> kruskal_mst() const;
+        std::vector<Edge> prim_mst() const;
 };
 
 class AirportNeighbor{

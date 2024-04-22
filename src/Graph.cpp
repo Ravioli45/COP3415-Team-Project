@@ -272,6 +272,39 @@ std::vector<Edge> AirportGraph::kruskal_mst() const{
     return mst;
 }
 
+std::vector<Edge> AirportGraph::prim_mst() const{
+    std::vector<Edge> mst;
+    MinHeap<Edge> to_search;
+    HashDSU<std::string> visited_dsu;
+    std::vector<std::string> keys = adj_map.keys();
+    unsigned num_airports = keys.size();
+    std::string start = keys[0];
+
+    for(AirportNeighbor n : adj_map.get(start)){
+        to_search.push(Edge(start, n.neighbor, n.cost));
+    }
+    while(!to_search.is_empty()){
+        Edge searching = to_search.pop();
+
+        // if this connection doesn't add a loop
+        if(visited_dsu.find_set(searching.from) != visited_dsu.find_set(searching.to)){
+            mst.push_back(searching);
+            for(AirportNeighbor n : adj_map.get(searching.to)){
+                to_search.push(Edge(searching.to, n.neighbor, n.cost));
+            }
+            visited_dsu.union_set(searching.from, searching.to);
+        }
+    }
+
+    //std::cout << mst.size() << std::endl;
+    if(mst.size() != (num_airports - 1)){
+        return {};
+    }
+    
+
+    return mst;
+}
+
 AirportNeighbor::AirportNeighbor(const std::string& neighbor_name, int the_distance, int the_cost){
     neighbor = neighbor_name;
     distance = the_distance;
