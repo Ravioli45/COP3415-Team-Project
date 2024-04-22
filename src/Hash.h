@@ -26,7 +26,10 @@ void swap(HashMap<K, V>& first, HashMap<K, V>& second);
 
 template<class K, class V>
 class HashMap{
+    static int counter;
     private:
+        int id;
+
         unsigned size;
         unsigned capacity;
         HashEntry<K, V>* *array;
@@ -38,6 +41,7 @@ class HashMap{
         HashMap();
         HashMap(unsigned the_capacity);
         HashMap(const HashMap& other);
+        HashMap(HashMap&& other) noexcept;
         HashMap& operator=(HashMap other);
         V& operator[](const K& key);
         ~HashMap();

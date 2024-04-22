@@ -66,6 +66,17 @@ HashMap<K, V>::HashMap(const HashMap& other){
     }
 }
 
+
+template<class K, class V>
+HashMap<K, V>::HashMap(HashMap&& other) noexcept {
+    this->size = other.size;
+    this->capacity = other.capacity;
+    this->array = other.array;
+    other.size = 0;
+    other.capacity = 0;
+    other.array = nullptr;
+}
+
 template<class K, class V>
 HashMap<K, V>& HashMap<K, V>::operator=(HashMap other){
     swap(*this, other);

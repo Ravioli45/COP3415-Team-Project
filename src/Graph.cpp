@@ -81,9 +81,17 @@ Path AirportGraph::dijkstra(const std::string& from, const std::string& to) cons
         }
         current = came_from[current].name;
     }
-    result.distance = came_from[to].distance;
-    result.cost = came_from[to].cost;
-    result.num_stops = came_from[to].num_stops;
+
+    if(!came_from.has_key(to)){
+        result.distance = 0;
+        result.cost = 0;
+        result.num_stops = 0;
+    }
+    else{
+        result.distance = came_from[to].distance;
+        result.cost = came_from[to].cost;
+        result.num_stops = came_from[to].num_stops;
+    }
 
     return result;
 }
