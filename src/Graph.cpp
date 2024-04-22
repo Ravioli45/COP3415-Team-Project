@@ -22,8 +22,8 @@ void AirportGraph::add_edge(const std::string& from, const std::string& to, int 
     num_connections[to]++;
 }
 void AirportGraph::add_edge_undirected(const std::string& from, const std::string& to, int distance, int cost){
-    add_edge(from, to, distance, cost);
-    add_edge(to, from, distance, cost);
+    this->add_edge(from, to, distance, cost);
+    this->add_edge(to, from, distance, cost);
 }
 
 Path AirportGraph::dijkstra(const std::string& from, const std::string& to) const{
@@ -192,11 +192,13 @@ AirportGraph AirportGraph::make_undirected(const AirportGraph& graph){
     HashMap<Edge, bool> added;
     AirportGraph result;
     std::vector<std::string> keys = graph.adj_map.keys();
+    //std::cout << "MU: " << keys.size() << ' ' << (Edge("Carl", "Bob", 23) == Edge("Bob", "Carl", 0)) << std::flush;
+    //std::cout << ' ' << (hash(Edge("Carl", "Bob", 23)) == hash(Edge("Bob", "Carl", 0))) << std::endl;
 
     for(std::string k : keys){
 
-        std::vector<AirportNeighbor> neighbors = graph.adj_map.get(k);
-        for(AirportNeighbor n : neighbors){
+        //std::vector<AirportNeighbor> neighbors = graph.adj_map.get(k);
+        for(AirportNeighbor n : graph.adj_map.get(k)){
             if(added[Edge(k, n.neighbor, 0)]){
                 continue;
             }
@@ -204,28 +206,70 @@ AirportGraph AirportGraph::make_undirected(const AirportGraph& graph){
             //have to look for connection from other direction
             //std::vector<AirportNeighbor> neighbor_neighbors = 
             if(!graph.adj_map.has_key(n.neighbor))
-                goto done;
+                goto no_returning;
             for(AirportNeighbor nn : graph.adj_map.get(n.neighbor)){
                 if(nn.neighbor == k){
                     //found connection from other direction
                     int min_cost = n.cost < nn.cost ? n.cost : nn.cost;
+                    //std::cout << "added: " << k << ' ' << n.neighbor << ' ' << n.cost << std::endl;
                     result.add_edge_undirected(k, n.neighbor, -1, min_cost);
                     goto done;
                 }
             }
             //if no connection from other direction was found
+            //std::cout << "added: " << k << ' ' << n.neighbor << ' ' << n.cost << std::endl;
+            no_returning:;
             result.add_edge_undirected(k, n.neighbor, -1, n.cost);
-
             done:;
+            //std::cout << "Should have added: " << k << ' ' << n.neighbor << ' ' << n.cost << std::endl;
+            added[Edge(k, n.neighbor, 0)] = true;
         }
 
     }
 
-    //for(auto test : result.adj_map.get("ORD")){
+    //for(auto test : result.adj_map.get("CHS")){
     //    std::cout << test.neighbor << ' ' << test.cost << std::endl;
     //}
+    //std::cout << "MU2: " << result.adj_map.keys().size() << std::endl;
+    //std::cout << result["CHS"].size() << std::endl;
 
     return result;
+}
+
+std::vector<Edge> AirportGraph::kruskal_mst() const{
+    std::vector<Edge> mst;
+
+    HashDSU<std::string> visited_dsu;
+    HashMap<Edge, bool> added;
+    MinHeap<Edge> to_search;
+    int test_count = 0;
+
+    for(std::string key : adj_map.keys()){
+        for(AirportNeighbor n : adj_map.get(key)){
+            if(added[Edge(key, n.neighbor, n.cost)]){
+                continue;
+            }
+            to_search.push(Edge(key, n.neighbor, n.cost));
+            added[Edge(key, n.neighbor, n.cost)] = true;
+            test_count++;
+        }
+    }
+    //std::cout << "C: " << test_count << ' ' << adj_map.keys().size() << ' ' << to_search.get_size() << std::endl;
+
+    while(!to_search.is_empty()){
+        Edge searching = to_search.pop();
+        //std::cout << "S: " << searching.from << "->" << searching.to << ':' << searching.weight << std::endl;
+        if(visited_dsu.find_set(searching.to) != visited_dsu.find_set(searching.from)){
+            //std::cout << 'h' << std::endl;
+            visited_dsu.union_set(searching.to, searching.from);
+            mst.push_back(searching);
+        }
+    }
+    //for(std::string key : adj_map.keys()){
+    //    std::cout << key << ' ' << visited_dsu.find_set(key) << std::endl;
+    //}
+
+    return mst;
 }
 
 AirportNeighbor::AirportNeighbor(const std::string& neighbor_name, int the_distance, int the_cost){

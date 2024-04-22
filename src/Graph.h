@@ -9,6 +9,7 @@
 
 class AirportNeighbor;
 class Path;
+class Edge;
 
 class AirportGraph{
     private:
@@ -26,6 +27,7 @@ class AirportGraph{
         unsigned get_num_connections(const std::string& airport_name) const;
 
         static AirportGraph make_undirected(const AirportGraph& graph);
+        std::vector<Edge> kruskal_mst() const;
 };
 
 class AirportNeighbor{
