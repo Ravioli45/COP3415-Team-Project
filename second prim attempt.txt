@@ -5,7 +5,7 @@ Minheap primMST(AirportGraph undirected_graph){
   while(undirected_graph.isEmpty()==false){
     cur = undirected_graph.pop();
     //for each current edge
-    primMST.dsu(cur.to,cur.from);    
+    primMST.union_set(cur.from,cur.to);    
 
   }
   return primMST;
