@@ -1,31 +1,45 @@
 #include "Graph.h"
 
+
+// defines hash function for StopInfo, only uses name and number of stops
+// 
+// StopInfo::operator== also only uses name and num_stops
 template<>
 inline unsigned long hash(const StopInfo& stop_info){
     return hash<>(stop_info.get_name()) + hash<>(stop_info.get_num_stops());
 }
 
+// defines hash function for Edge
+//
+// note that of from and to are switched the hash remains the same
 template<>
 inline unsigned long hash(const Edge& edge){
     return hash<>(edge.get_from()) + hash<>(edge.get_to());
 }
 
+// default constructor for airport graph
 AirportGraph::AirportGraph() : adj_map(){};
 
+// using [] with airport graph uses [] with underlying hashmap
 std::vector<AirportNeighbor>& AirportGraph::operator[](const std::string& airport_name){
     return adj_map[airport_name];
 }
 
+// add the edge described by from, to, distance, and cost
 void AirportGraph::add_edge(const std::string& from, const std::string& to, int distance, int cost){
     adj_map[from].push_back(AirportNeighbor(to, distance, cost));
     num_connections[from]++;
     num_connections[to]++;
 }
+// add the edge described by from, to, distance, and cost in both directions
 void AirportGraph::add_edge_undirected(const std::string& from, const std::string& to, int distance, int cost){
     this->add_edge(from, to, distance, cost);
     this->add_edge(to, from, distance, cost);
 }
 
+// uses dijkstras algorithm to find the shortest distance path between from and to
+//
+// returns the path object that describes the complete path
 Path AirportGraph::dijkstra(const std::string& from, const std::string& to) const{
     HashMap<std::string, bool> visited;
     HashMap<std::string, StopInfo> came_from;
@@ -33,12 +47,13 @@ Path AirportGraph::dijkstra(const std::string& from, const std::string& to) cons
     Path result;
     bool found_path = false;
 
-    // from, distance, cost, num_stops
+    // StopInfo(from, distance, cost, num_stops);
     to_search.push(StopInfo(from, "", 0, 0, -1));
 
+    // searches current shortest available path
     while(!to_search.is_empty()){
         StopInfo searching = to_search.pop();
-        //std::cout << "Popped: " << searching.name << ' ' << searching.distance << ' ' << searching.cost << ' ' << searching.length << std::endl;
+        
         if(visited[searching.name]){
             continue;
         }
@@ -46,11 +61,12 @@ Path AirportGraph::dijkstra(const std::string& from, const std::string& to) cons
             found_path = true;
             break;
         }
-        //std::cout << "Searching" << std::endl;
-        //std::cout << searching.name << searching.distance << std::endl;
+        
+        // this had to be added since some airports have no outbound connections
         if(!adj_map.has_key(searching.name)){
             continue;
         }
+        // discovers neighbors
         std::vector<AirportNeighbor> neighbors = adj_map.get(searching.name);
         for(AirportNeighbor n : neighbors){
             int new_dist = searching.distance + n.distance;
@@ -62,19 +78,20 @@ Path AirportGraph::dijkstra(const std::string& from, const std::string& to) cons
             }
 
             to_search.push(StopInfo(n.neighbor, searching.name, new_dist, new_cost, new_num_stops));
-            //std::cout << "Added: " << n.get_neighbor() << ' ' << new_dist << ' ' << new_cost << ' ' << new_length << std::endl;
+            
         }
+        // mark as searched
         visited[searching.name] = true;
     }
 
+    // if no path was foun return empty Path
     if(!found_path){
         return result;
     }
 
-    //std::cout << "making path" << std::endl;
+    // reconstruct path
     std::string current = to;
     while(true){
-        //std::cout << current << std::endl;
         result.stops.push_back(current);
         if(current == from){
             break;
@@ -96,7 +113,12 @@ Path AirportGraph::dijkstra(const std::string& from, const std::string& to) cons
     return result;
 }
 
+
+// uses a slightly modified version of dijkstras algorithm to find the shortest path
+// with a certain number of stops
 Path AirportGraph::dijkstra_n_stops(const std::string& from, const std::string& to, int required_stops) const{
+    // similar to dijksrta, but vertices can be searched multiple and a dsu is used to prevent searching in loops
+    // forever
     Path result;
     HashDSU<std::string> visited_dsu;
     HashMap<StopInfo, bool> visited;
@@ -150,27 +172,22 @@ Path AirportGraph::dijkstra_n_stops(const std::string& from, const std::string& 
             int new_num_stops = searching.num_stops+1;
 
             if(came_from[StopInfo(n.neighbor, searching.name, 0, 0, new_num_stops)].distance > new_dist){
-                //came_from[n.neighbor] = StopInfo(searching.name, "", new_dist, new_cost, new_num_stops);
                 came_from[StopInfo(n.neighbor, searching.name, 0, 0, new_num_stops)] = StopInfo(searching.name, "", new_dist, new_cost, new_num_stops);
             }
 
-            //std::cout << "Came from: " << n.neighbor << ' ' << searching.name << ' ' << new_num_stops << std::endl;
             to_search.push(StopInfo(n.neighbor, searching.name, new_dist, new_cost, new_num_stops));
         }
         visited[searching] = true;
         //???
         visited_dsu.union_set(searching.name, searching.from);
     }
-    //std::cout << found_path << std::endl;
 
     if(!found_path){
         return result;
     }
-    //std::cout << "making path" << std::endl;
     std::string current = to;
     int stops = required_stops;
     while(true){
-        //std::cout << current << ' ' << stops << std::endl;
         result.stops.push_back(current);
         if(current == from){
             break;
@@ -187,7 +204,6 @@ Path AirportGraph::dijkstra_n_stops(const std::string& from, const std::string& 
 }
 
 unsigned AirportGraph::get_num_connections(const std::string& airport_name) const{
-    //return num_connections[airport_name];
     if(!num_connections.has_key(airport_name)){
         return 0;
     }
@@ -200,46 +216,33 @@ AirportGraph AirportGraph::make_undirected(const AirportGraph& graph){
     HashMap<Edge, bool> added;
     AirportGraph result;
     std::vector<std::string> keys = graph.adj_map.keys();
-    //std::cout << "MU: " << keys.size() << ' ' << (Edge("Carl", "Bob", 23) == Edge("Bob", "Carl", 0)) << std::flush;
-    //std::cout << ' ' << (hash(Edge("Carl", "Bob", 23)) == hash(Edge("Bob", "Carl", 0))) << std::endl;
 
     for(std::string k : keys){
 
-        //std::vector<AirportNeighbor> neighbors = graph.adj_map.get(k);
         for(AirportNeighbor n : graph.adj_map.get(k)){
             if(added[Edge(k, n.neighbor, 0)]){
                 continue;
             }
 
-            //have to look for connection from other direction
-            //std::vector<AirportNeighbor> neighbor_neighbors = 
+            //have to look for connection from other direction 
             if(!graph.adj_map.has_key(n.neighbor))
                 goto no_returning;
             for(AirportNeighbor nn : graph.adj_map.get(n.neighbor)){
                 if(nn.neighbor == k){
                     //found connection from other direction
                     int min_cost = n.cost < nn.cost ? n.cost : nn.cost;
-                    //std::cout << "added: " << k << ' ' << n.neighbor << ' ' << n.cost << std::endl;
                     result.add_edge_undirected(k, n.neighbor, -1, min_cost);
                     goto done;
                 }
             }
             //if no connection from other direction was found
-            //std::cout << "added: " << k << ' ' << n.neighbor << ' ' << n.cost << std::endl;
             no_returning:;
             result.add_edge_undirected(k, n.neighbor, -1, n.cost);
             done:;
-            //std::cout << "Should have added: " << k << ' ' << n.neighbor << ' ' << n.cost << std::endl;
             added[Edge(k, n.neighbor, 0)] = true;
         }
 
     }
-
-    //for(auto test : result.adj_map.get("CHS")){
-    //    std::cout << test.neighbor << ' ' << test.cost << std::endl;
-    //}
-    //std::cout << "MU2: " << result.adj_map.keys().size() << std::endl;
-    //std::cout << result["CHS"].size() << std::endl;
 
     return result;
 }
@@ -250,8 +253,8 @@ std::vector<Edge> AirportGraph::kruskal_mst() const{
     HashDSU<std::string> visited_dsu;
     HashMap<Edge, bool> added;
     MinHeap<Edge> to_search;
-    int test_count = 0;
 
+    // create minheap of all unique edges
     for(std::string key : adj_map.keys()){
         for(AirportNeighbor n : adj_map.get(key)){
             if(added[Edge(key, n.neighbor, n.cost)]){
@@ -259,23 +262,18 @@ std::vector<Edge> AirportGraph::kruskal_mst() const{
             }
             to_search.push(Edge(key, n.neighbor, n.cost));
             added[Edge(key, n.neighbor, n.cost)] = true;
-            test_count++;
         }
     }
-    //std::cout << "C: " << test_count << ' ' << adj_map.keys().size() << ' ' << to_search.get_size() << std::endl;
 
+    // while minheap isnt empty
     while(!to_search.is_empty()){
         Edge searching = to_search.pop();
-        //std::cout << "S: " << searching.from << "->" << searching.to << ':' << searching.weight << std::endl;
+        // if popped edge doesn't form a loop add it to mst
         if(visited_dsu.find_set(searching.to) != visited_dsu.find_set(searching.from)){
-            //std::cout << 'h' << std::endl;
             visited_dsu.union_set(searching.to, searching.from);
             mst.push_back(searching);
         }
     }
-    //for(std::string key : adj_map.keys()){
-    //    std::cout << key << ' ' << visited_dsu.find_set(key) << std::endl;
-    //}
 
     return mst;
 }
@@ -283,7 +281,7 @@ std::vector<Edge> AirportGraph::kruskal_mst() const{
 std::vector<Edge> AirportGraph::prim_mst() const{
     std::vector<Edge> mst;
     MinHeap<Edge> to_search;
-    HashDSU<std::string> visited_dsu;
+    HashMap<std::string, bool> visited;
     std::vector<std::string> keys = adj_map.keys();
     unsigned num_airports = keys.size();
     std::string start = keys[0];
@@ -291,20 +289,28 @@ std::vector<Edge> AirportGraph::prim_mst() const{
     for(AirportNeighbor n : adj_map.get(start)){
         to_search.push(Edge(start, n.neighbor, n.cost));
     }
+    visited[start] = true;
     while(!to_search.is_empty()){
         Edge searching = to_search.pop();
 
-        // if this connection doesn't add a loop
-        if(visited_dsu.find_set(searching.from) != visited_dsu.find_set(searching.to)){
-            mst.push_back(searching);
-            for(AirportNeighbor n : adj_map.get(searching.to)){
-                to_search.push(Edge(searching.to, n.neighbor, n.cost));
-            }
-            visited_dsu.union_set(searching.from, searching.to);
+        // if this connection doesn't add a loop...
+        if(visited[searching.to]){
+            continue;
         }
+
+        // ...added to mst and marked searching.to as visited
+        mst.push_back(searching);
+        for(AirportNeighbor n : adj_map.get(searching.to)){
+            to_search.push(Edge(searching.to, n.neighbor, n.cost));
+        }
+        //visited[searching.from] = true;
+        visited[searching.to] = true;
+
     }
 
-    //std::cout << mst.size() << std::endl;
+    // return empty mst if prims could not connect all nodes in mst
+    // this occurs when graph is disconnected
+    std::cout << mst.size() << std::endl;
     if(mst.size() != (num_airports - 1)){
         return {};
     }
@@ -313,49 +319,67 @@ std::vector<Edge> AirportGraph::prim_mst() const{
     return mst;
 }
 
+// costructor for AirportNeighbor
 AirportNeighbor::AirportNeighbor(const std::string& neighbor_name, int the_distance, int the_cost){
     neighbor = neighbor_name;
     distance = the_distance;
     cost = the_cost;
 }
 
+// returns neighbor field of AirportNeighbor
 const std::string& AirportNeighbor::get_neighbor() const{
     return neighbor;
 }
+// returns distance field of AirportNeighbor
 const int& AirportNeighbor::get_distance() const{
     return distance;
 }
+// returns cost field of AirportNeighbor
 const int& AirportNeighbor::get_cost() const{
     return cost;
 }
 
+// default constructor for edge
+//
+// empty string for from and to with a weight of 0
 Edge::Edge() : from(""), to(""), weight(0){};
+
+// construct edge with given from, to, and weight
 Edge::Edge(const std::string& came_from, const std::string& go_to, int the_weight){
     from = came_from;
     to = go_to;
     weight = the_weight;
 }
+// overloading == for Edge
 bool Edge::operator==(const Edge& other) const{
-    //bool dest_match = ((this->from == other.from) && (this->to == other.to)) || ((this->from == other.to) && (this->to == other.from));
+    // edges are equal if they have the same endpoints
     return ((this->from == other.from) && (this->to == other.to)) || ((this->from == other.to) && (this->to == other.from));
 }
+// overloading > for edge, uses weight field
 bool Edge::operator>(const Edge& other) const{
     return this->weight > other.weight;
 }
+// overloading < for edge, uses weight field
 bool Edge::operator<(const Edge& other) const{
     return this->weight < other.weight;
 }
+// getter for from value
 const std::string& Edge::get_from() const{
     return from;
 }
+// getter for to value
 const std::string& Edge::get_to() const{
     return to;
 }
+// getter for edge weight
 const int& Edge::get_weight() const{
     return weight;
 }
 
+// default constructor for stopinfo, sets distance, cost, and num_stops to INT_MAX
+// acts as infinite distance, cost, and stops
 StopInfo::StopInfo() : StopInfo("", "", INT_MAX, INT_MAX, INT_MAX){};
+// construct StopInfo instance with given name, came_from, distance, cost, and num_stops
 StopInfo::StopInfo(const std::string& the_name, const std::string& came_from, int the_distance, int the_cost, int the_num_stops){
     name = the_name;
     from = came_from;
@@ -363,44 +387,56 @@ StopInfo::StopInfo(const std::string& the_name, const std::string& came_from, in
     cost = the_cost;
     num_stops = the_num_stops;
 };
-
+// overload == for StopInfo, uses name and num_stops
 bool StopInfo::operator==(const StopInfo& other) const{
     return this->name == other.name && this->num_stops == other.num_stops;
 }
+// overload > for StopInfo, uses distance
 bool StopInfo::operator>(const StopInfo& other) const{
     return this->distance > other.distance;
 }
+// overload < for StopInfo, uses distance
 bool StopInfo::operator<(const StopInfo& other) const{
     return this->distance < other.distance;
 }
 
+// return name from StopInfo
 const std::string& StopInfo::get_name() const{
     return name;
 }
+// return `from` from StopInfo
 const std::string& StopInfo::get_from() const{
     return from;
 }
+// return distance from StopInfo
 const int& StopInfo::get_distance() const{
     return distance;
 };
+// returns cost from StopInfo
 const int& StopInfo::get_cost() const{
     return cost;
 };
+// returns num_stops from StopInfo
 const int& StopInfo::get_num_stops() const{
     return num_stops;
 };
 
+// default constructor for path uses default constructor for all fields
 Path::Path() : stops(), distance(), cost(), num_stops(){};
 
+// returns stops vector from Path
 const std::vector<std::string>& Path::get_stops() const{
     return stops;
 }
+// returns total distnce from Path
 const int& Path::get_distance() const{
     return distance;
 }
+// returns total cost from Path
 const int& Path::get_cost() const{
     return cost;
 }
+// returns total num_stops from Path
 const int& Path::get_num_stops() const{
     return num_stops;
 }

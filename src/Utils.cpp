@@ -4,6 +4,9 @@
 #include "Utils.h"
 
 namespace utils{
+    // custom swap function so that I don't have to use std::swap
+    //
+    // it does exactly what you think it does
     template<typename T>
     void swap(T& a, T& b){
         T temp = a;
@@ -11,6 +14,9 @@ namespace utils{
         b = temp;
     }
 
+    // template function for sorting a vector<T> in place
+    //
+    // uses selection sort to sort the given vector
     template<typename T>
     void sort(std::vector<T>& vec){
         for(long unsigned i = 0; i < vec.size(); i++){

@@ -18,7 +18,7 @@ std::vector<std::string> get_airport_names(const HashMap<std::string, std::vecto
 HashMap<std::string, std::vector<std::string>> get_airports_in_states(const HashMap<std::string, std::vector<std::string>>& data);
 
 void show_options(const std::vector<std::string>& options, int items_per_row=1);
-void print_mst(const std::vector<Edge>& mst, int width=0);
+int print_mst(const std::vector<Edge>& mst, int width=0);
 
 int get_input_in_range(int min, int max, const std::string& prompt);
 
@@ -150,7 +150,6 @@ int main(){
         else if(choice == 5){
             std::vector<Edge> prim_mst = airport_graph_u.prim_mst();
 
-            //std::cout << std::endl;
             if(prim_mst.size() == 0){
                 std::cout << "No minimum spanning tree could be formed with Prim's algorithm" << std::endl;
             }
@@ -158,8 +157,9 @@ int main(){
                 std::cout << "Minimum Spanning Tree:" << std::endl;
                 std::cout << std::left;
                 std::cout << std::setw(15) << "Edge" << std::setw(15) << "Weight" << std::endl;
-                print_mst(prim_mst, 15);
+                int total_weight = print_mst(prim_mst, 15);
                 std::cout << std::right;
+                std::cout << std::endl << "Total Cost of MST: " << total_weight << std::endl;
             }
         }
         else if(choice == 6){
@@ -167,8 +167,9 @@ int main(){
             std::cout << "Minimum Spanning Tree:" << std::endl;
             std::cout << std::left;
             std::cout << std::setw(15) << "Edge" << std::setw(15) << "Weight" << std::endl;
-            print_mst(kruskal_mst, 15);
+            int total_weight = print_mst(kruskal_mst, 15);
             std::cout << std::right;
+            std::cout << std::endl << "Total Cost of MST: " << total_weight << std::endl;
         }
         else if(choice == 7){
             break;
@@ -263,6 +264,7 @@ HashMap<std::string, std::vector<std::string>> read_airport_csv(const std::strin
     return result;
 }
 
+// generates directed graph for airport from csv data
 AirportGraph graph_from_data(const HashMap<std::string, std::vector<std::string>>& data){
     AirportGraph result;
 
@@ -281,6 +283,7 @@ AirportGraph graph_from_data(const HashMap<std::string, std::vector<std::string>
     return result;
 }
 
+// gets a vector of strings containing the names of all airports
 std::vector<std::string> get_airport_names(const HashMap<std::string, std::vector<std::string>>& data){
     int rows = data.get("Origin").size();
 
@@ -296,16 +299,12 @@ std::vector<std::string> get_airport_names(const HashMap<std::string, std::vecto
     return airport_set.keys();
 }
 
+// returns a hashmap where result[state_name] gives a vector of all the airports in a state
 HashMap<std::string, std::vector<std::string>> get_airports_in_states(const HashMap<std::string, std::vector<std::string>>& data){
     HashMap<std::string, std::vector<std::string>> result;
     HashMap<std::string, int> state_indices;
     int counter = 0;
     std::vector<HashMap<std::string, Empty>> state_airports;
-
-    //std::cout << "GAIS" << std::endl;
-
-    state_airports.push_back(HashMap<std::string, Empty>());
-    //state_sets.put("FL", HashMap<std::string, Empty>());
 
     int rows = data.get("Origin").size();
 
@@ -359,14 +358,17 @@ void show_options(const std::vector<std::string>& options, int items_per_row){
     std::cout << std::endl;
 }
 
-void print_mst(const std::vector<Edge>& mst, int width){
+int print_mst(const std::vector<Edge>& mst, int width){
+    int total_cost = 0;
     //std::cout << std::left;
     for(Edge e : mst){
         std::string edge_str;
 
         edge_str += e.get_from() + " - " + e.get_to();
         std::cout << std::setw(width) << edge_str << std::setw(width) << e.get_weight() << std::endl;
+        total_cost += e.get_weight();
     }
+    return total_cost;
 }
 
 int get_input_in_range(int min, int max, const std::string& prompt){

@@ -6,14 +6,18 @@
 template <typename T>
 class MinHeap;
 
+// swap function that gets used in the copy assignment of MinHeap
 template<typename T>
 void swap(MinHeap<T>& first, MinHeap<T>& second);
 
+// template class for a MinHeap containing elements 
+// of type T
 template <typename T>
 class MinHeap{
     private:
         unsigned size;
         unsigned capacity;
+        // array is a heap allocated array holding the elements in the minheap
         T* array;
 
         void percolate_up(unsigned index);

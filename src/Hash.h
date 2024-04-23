@@ -24,6 +24,8 @@ class HashMap;
 template<class K, class V>
 void swap(HashMap<K, V>& first, HashMap<K, V>& second);
 
+// template class for a HashMap with keys of type K and 
+// values of type V
 template<class K, class V>
 class HashMap{
     static int counter;
@@ -54,6 +56,8 @@ class HashMap{
         friend void swap<>(HashMap& first, HashMap& second);
 };
 
+// represents the elements stored in a HashMap with keys of type K
+// and values of type V
 template<class K, class V>
 class HashEntry{
     private:
@@ -67,6 +71,9 @@ class HashEntry{
 };
 
 
+// represents a DSU containing elements of typt T
+//
+// uses HashMap<T, T>
 template<typename T>
 class HashDSU{
     private:

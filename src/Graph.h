@@ -11,6 +11,11 @@ class AirportNeighbor;
 class Path;
 class Edge;
 
+// represents a graph of connected airports
+//
+// uses a hashmap to make an adjacency list of the airports
+//
+// maintains internal counters for the number of connections each airport has
 class AirportGraph{
     private:
         HashMap<std::string, std::vector<AirportNeighbor>> adj_map;
@@ -31,6 +36,9 @@ class AirportGraph{
         std::vector<Edge> prim_mst() const;
 };
 
+// class of the object stored in the adjacency list described in AirportGraph
+//
+// stores the destination, distance, and cost
 class AirportNeighbor{
     private:
         std::string neighbor;
@@ -46,6 +54,9 @@ class AirportNeighbor{
     friend class AirportGraph;
 };
 
+// represents an edge in a graph
+//
+// stores when the edge came from, where it goes to, and the weight of edge
 class Edge{
     private:
         std::string from;
@@ -66,6 +77,9 @@ class Edge{
     friend class AirportGraph;
 };
 
+// class used to store partial connections for dijkstra and minheap
+// stores the current node, previous node, distance to reach this node, cost to reach this node,
+// and num_stops to reach this node
 class StopInfo{
     private:
         std::string name;
@@ -90,6 +104,10 @@ class StopInfo{
     friend class AirportGraph;
 };
 
+// represents a complete path between two locations in AirportGraph 
+//
+// stores all the locations in the path, the total distance of the path,
+// the total cost of the path and the total number of stops in the path
 class Path{
     private:
         std::vector<std::string> stops;

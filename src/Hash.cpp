@@ -1,27 +1,30 @@
 #include "Hash.h"
 #include <iostream>
 
+// uses sdbm hash to hash strings
+//
+// source: http://www.cse.yorku.ca/~oz/hash.html
 template<>
 inline unsigned long hash(const std::string& str){
-    //return std::hash<std::string>{}(str);
-    //unsigned long hash = 5381;
     unsigned long hash = 0;
     for(char c : str){
-        //hash = ((hash << 5) + hash) + c;
         hash = c + (hash << 6) + (hash << 16) - hash;
     }
     
     return hash;
 }
 
+// hash funtion for ints
 template<>
 inline unsigned long hash(const int& n){
     return n;
 }
 
+// default constructor for hashmap, creates hashmap with capacity of 16
 template<class K, class V>
 HashMap<K, V>::HashMap() : HashMap(16){}
 
+// creates a hashmap with a given capacity
 template<class K, class V>
 HashMap<K, V>::HashMap(unsigned the_capacity){
     size = 0;
@@ -32,6 +35,7 @@ HashMap<K, V>::HashMap(unsigned the_capacity){
     }
 }
 
+// destructor for hashmap
 template<class K, class V>
 HashMap<K, V>::~HashMap(){
     int counter = 0;
@@ -40,16 +44,17 @@ HashMap<K, V>::~HashMap(){
 
         while(current != nullptr){
             HashEntry<K, V>* next = current->next;
-            //std::cout << "deleting: " << current->key << ':' << current->value << std::endl;
+            // delete all HashEntry in the hashmap
             delete current;
             current = next;
             counter++;
         }
     }
-    //std::cout << "deleted: " << counter << std::endl;
+    // delete array of HashEntry*
     delete [] array;
 }
 
+// copy constructor for HashMap
 template<class K, class V>
 HashMap<K, V>::HashMap(const HashMap& other){
     this->capacity = other.capacity;
@@ -57,6 +62,7 @@ HashMap<K, V>::HashMap(const HashMap& other){
 
     this->array = new HashEntry<K, V>*[this->capacity];
 
+    // put all elements from other HashMap into this HashMap
     for(unsigned i = 0; i < other.capacity; i++){
         HashEntry<K, V>* current = other.array[i];
         while(current != nullptr){
@@ -66,7 +72,7 @@ HashMap<K, V>::HashMap(const HashMap& other){
     }
 }
 
-
+// move constructor for hashmap, I needed this to make std::vector<HashMap> work
 template<class K, class V>
 HashMap<K, V>::HashMap(HashMap&& other) noexcept {
     this->size = other.size;
@@ -77,12 +83,17 @@ HashMap<K, V>::HashMap(HashMap&& other) noexcept {
     other.array = nullptr;
 }
 
+// copy assignment for HashMap
 template<class K, class V>
 HashMap<K, V>& HashMap<K, V>::operator=(HashMap other){
     swap(*this, other);
     return *this;
 }
 
+// define [] operator for hashmap
+//
+// if the key being used does not exist then it is filled with the
+// value returned by the default constructor for V
 template<class K, class V>
 V& HashMap<K, V>::operator[](const K& key){
 
@@ -119,6 +130,7 @@ V& HashMap<K, V>::operator[](const K& key){
     }
 }
 
+// puts a key value pair into the HashMap
 template<class K, class V>
 void HashMap<K, V>::put(const K& key,const V& value){
     int index = hash<K>(key) % capacity;
@@ -148,6 +160,10 @@ void HashMap<K, V>::put(const K& key,const V& value){
         rehash(2*capacity);
     }
 }
+
+// get the value associated with the given key
+//
+// throws if the given key is not already present in the HashMap
 template<class K, class V>
 V& HashMap<K, V>::get(const K &key) const{
     int index = hash<K>(key) % capacity;
@@ -164,6 +180,8 @@ V& HashMap<K, V>::get(const K &key) const{
     throw std::out_of_range("key does not exist");
 }
 
+// returns true if a given key is present in the hashmap
+// returns false otherwise
 template<class K, class V>
 bool HashMap<K, V>::has_key(const K& key) const{
     int index = hash<K>(key) % capacity;
@@ -196,9 +214,11 @@ std::vector<K> HashMap<K, V>::keys() const{
     return result;
 }
 
+// used to increase the capacity of the hashmap when necessary
+//
+// when increasing the capacity all elements must be rehashed
 template<class K, class V>
 void HashMap<K, V>::rehash(unsigned new_capacity){
-    //std::cout << "rehash: ";
     HashMap<K, V> that(new_capacity);
 
     for(unsigned i = 0; i < capacity; i++){
@@ -217,6 +237,7 @@ void HashMap<K, V>::rehash(unsigned new_capacity){
     //std::cout << capacity << std::endl;
 }
 
+// swaps two hashmaps with each other
 template<class K, class V>
 void swap(HashMap<K, V>& first, HashMap<K, V>& second){
     utils::swap(first.size, second.size);
@@ -224,6 +245,8 @@ void swap(HashMap<K, V>& first, HashMap<K, V>& second){
     utils::swap(first.array, second.array);
 }
 
+// construcrs new hashmap with the given key and value
+// and with no next hashentry
 template<class K, class V>
 HashEntry<K, V>::HashEntry(const K& the_key, const V& the_value){
     key = the_key;
@@ -232,12 +255,17 @@ HashEntry<K, V>::HashEntry(const K& the_key, const V& the_value){
     next = nullptr;
 }
 
+// makes a set with value in the hashDSU
 template<typename T>
 void HashDSU<T>::make_set(const T& value){
     parent[value] = value;
     rank[value] = 0;
 }
 
+// finds the representative of the set that contains the given value
+// in the hashDSU
+//
+// uses path compression to maintain efficiency
 template<typename T>
 const T& HashDSU<T>::find_set(const T& value){
     if(!parent.has_key(value)){
@@ -249,6 +277,9 @@ const T& HashDSU<T>::find_set(const T& value){
     return parent[value] = find_set(parent[value]);
 }
 
+// unions the sets containing the given elements
+//
+// uses union by rank to maintain efficinncy
 template<typename T>
 void HashDSU<T>::union_set(const T& first, const T& second){
     const T& rep1 = find_set(first);
