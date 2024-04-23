@@ -310,7 +310,6 @@ std::vector<Edge> AirportGraph::prim_mst() const{
 
     // return empty mst if prims could not connect all nodes in mst
     // this occurs when graph is disconnected
-    std::cout << mst.size() << std::endl;
     if(mst.size() != (num_airports - 1)){
         return {};
     }
